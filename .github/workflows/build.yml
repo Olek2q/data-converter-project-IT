@@ -1,0 +1,38 @@
+name: Build Executable
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * 0' # Niedziela o północy
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        
+    - name: Install dependencies
+      run: .\scripts\installResources.ps1
+      
+    - name: Build CLI
+      run: pyinstaller --onefile src/main.py
+      
+    - name: Build GUI
+      run: pyinstaller --onefile --noconsole src/gui.py
+      
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: executables
+        path: |
+          dist/main.exe
+          dist/gui.exe
